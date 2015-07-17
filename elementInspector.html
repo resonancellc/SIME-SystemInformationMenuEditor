@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Untitled Document</title>
+<script src="UtilsDOM.js"></script>
+<script src="layout.js"></script>
+<script src="extends.js"></script>
+<script src="drag_n_resize.js"></script>
+
+<style type="text/css">
+#apDiv1 {
+	position:absolute;
+	left:62px;
+	top:113px;
+	width:170px;
+	height:153px;
+	z-index:1;
+	border: 1px solid red;
+}
+#inspectorDiv {
+	position:absolute;
+	left:364px;
+	top:32px;
+	width:310px;
+	height:585px;
+	z-index:2;
+	border: 1px solid black;
+}
+</style>
+</head>
+<body>
+
+
+<div id="apDiv1"></div>
+<div id="inspectorDiv"></div>
+
+<script type="text/javascript">
+/* JAVASCRIPT GOES HERE */
+window.onload=function(){
+	
+	// property,inputType,description'
+	var inspectorDiv=document.getElementById('inspectorDiv');
+	inspect.call(document.getElementById('apDiv1'));
+	
+};
+
+var element;
+
+var inspector={
+	width:{
+		label:'Width',
+		input:{type:'text'},
+		getter:function(){return getStyle(this,'width',true)},
+		setter:function(){element.style.width=this.value+"px";}
+	},
+	height:{
+		label:'Height',
+		input:{type:'number'},
+		getter:function(){return getStyle(this,'height',true)},
+		setter:function(){element.style.height=this.value+"px";}
+	},
+	top:{
+		label:'Y',
+		input:{type:'number'},
+		getter:function(){return getStyle(this,'top',true)},
+		setter:function(){element.style.top=this.value+"px";}
+	},
+	left:{
+		label:'X',
+		input:{type:'number'},
+		getter:function(){return getStyle(this,'left',true)},
+		setter:function(){element.style.left=this.value+"px";}
+	},
+	innerText:{
+		label:'Text',
+		input:{type:'text'},
+		getter:function(){return this.innerText},
+		setter:function(){element.innerText=this.value;}
+	},
+	blabla:{
+		label:'Color',
+		input:{type:'color'},
+		getter:function(){return getStyle(this,'backgroundColor')},
+		setter:function(){element.innerText=this.value;}
+	}	
+}
+
+function inspect(){
+	
+	element=this;
+	
+	for(property in inspector){
+		
+		var m=inspector[property];
+		
+		var label=newElement('div','',{},m.label,inspectorDiv);
+		
+		var editor;
+		editor=newElement('input','',m.input,'',label);
+		
+		editor.value=m.getter.call(element);
+		
+		editor.onblur=m.setter;
+		editor.onclick=m.setter;
+		
+		element.onclick=inspect;
+		
+	}
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Untitled Document</title>
+<script src="UtilsDOM.js"></script>
+<script src="layout.js"></script>
+<script src="extends.js"></script>
+<script src="drag_n_resize.js"></script>
+<script src="drag_n_resize.js"></script>
+
+<style type="text/css">
+
+body{
+	background-color: #CCC;
+}
+
+#Editor {
+	position:absolute;
+	left:20px;
+	top:95px;
+	width:480px;
+	height:272px;
+	z-index:1;
+	border: 3px inset #666;
+	background-color:#6CC;
+}
+#Toolbar {
+	position:absolute;
+	left:19px;
+	top:37px;
+	width:481px;
+	height:32px;
+	z-index:2;
+}
+#Inspector {
+	position:absolute;
+	left:22px;
+	top:447px;
+	width:486px;
+	height:263px;
+	z-index:3;
+}
+
+.ICONXPBUTTON{
+	position:absolute;
+	left: 30px;
+	top: 30px;
+	width: 48px;
+	height: 48px;
+	border: 0px solid navy;
+	
+	background-color: #09F;
+}
+
+.TEXT{
+	position:absolute;
+	left: 30px;
+	top: 30px;
+	width: 48px;
+	height: 48px;
+	border: 0px solid navy;
+	background-color: transparent;
+}
+
+
+._Editing{
+	border-style: dashed;
+	border-width: 1px;
+	border-color: #F0F;
+	
+	/*box-shadow: 0px 0px 4px #ff00ff;*/
+	
+}
+
+*{
+    -webkit-user-select:none;
+}
+
+
+
+
+
+div{
+    width: 100px;
+    height: 100px;
+    border:1px solid #aaa;
+    display:inline-block;
+    position:absolute;
+}
+
+div.grabber{
+	visibility:hidden;
+    top: -5px;
+    left: -5px;
+    width: 5px;
+    height: 5px;
+    background: #CCC;
+    border:3px double #333;
+    cursor: move;
+    position:absolute;
+}
+div.grabber:active{
+	background: #333;
+}
+
+div.resizer{
+	visibility:hidden;
+    bottom: -5px;
+    right: -5px;
+    width: 8px;
+    height: 8px;
+    background: #FFF;
+    border:1px solid #aaa;
+    cursor: nwse-resize;
+    position:absolute;
+}
+div.resizer:active{
+	background: #333;
+}
+
+#apDiv1 {
+	position:absolute;
+	left:527px;
+	top:95px;
+	width:378px;
+	height:509px;
+	z-index:4;
+}
+</style>
+</head>
+<body>
+
+
+<div id="Toolbar">
+    <button onclick='addIcon(this)'>ICONXPBUTTON</button>
+    <button onclick='addText(this)'>Text</button>
+    <button onclick='readAllComponents(this)'>Get Code</button>
+
+</div>
+
+
+<div id="Inspector"></div>
+
+
+<div id="Editor">
+
+
+</div>
+
+<div id="apDiv1">
+    <p>Inspetor Icones</p>
+    <p>X:<input type=number></p>
+    <p>Y:<input type=number></p>
+    <p>SizeNormal:<input type=number></p>
+    <p>SizePushed:<input type=number></p>
+    <p>ScaleAlpha:<input type=number></p>
+    <p>IconNormal:<input id="icon" type=file></p>
+    <p>ScaleAlpha:<input type=number></p>
+    <p>IconPushed:<input type=file></p>
+    <p>Command:<input type=file></p>
+    <p>NewIni:<input type=file></p>
+    <p>ShutDownAnimation:
+    <select>
+    <option>NoAnimation</option>
+    <option>FlyLeft</option>
+    <option>FlyRight</option>
+    <option>FlyUp</option>
+    <option>FlyDown</option>
+    <option>FlyDiagLeftUp</option>
+    <option>FlyDiagLeftDown</option>
+    <option>FlyDiagRightUp</option>
+    <option>FlyDiagRightDown</option>
+    <option>RollDown</option>
+    </select></p>
+</div>
+
+
+<script type="text/javascript">
+/* JAVASCRIPT GOES HERE */
+window.onload=function(){
+	window.editor=document.getElementById('Editor');
+	
+	var ele = document.getElementsByClassName("drag");
+	for(var i = 0; i < ele.length; i++){
+		enableDragging(ele[i]);
+		enableResizing(ele[i]);
+	}
+	
+};
+
+var editingElm;
+
+function addIcon(btn){
+	
+	btn.disabled="disabled";
+	editor.style.cursor="crosshair";
+	
+	editor.onclick=function(ev){
+		btn.disabled="";
+		editor.onclick=null;
+		editor.style.cursor="";
+		
+		current = ev.target.parentNode;
+        x = ev.clientX - editor.offsetLeft;
+        y = ev.clientY - editor.offsetTop;
+		
+		var el=newElement('div','',{className:'Component ICONXPBUTTON','data-type':'ICONXPBUTTON'},'',editor);
+		
+		el.onmousedown=editIcon;
+		el.style.top = y+'px';
+		el.style.left = x+'px';
+		
+		enableDragging(el);
+		enableResizing(el);
+	}
+}
+
+function addText(btn){
+	
+	btn.disabled="disabled";
+	
+	editor.onclick=function(ev){
+		btn.disabled="";
+		editor.onclick=null;
+		
+		current = ev.target.parentNode;
+        x = ev.clientX - editor.offsetLeft;
+        y = ev.clientY - editor.offsetTop;
+		
+		var el=newElement('div','',{className:'Component TEXT','data-type':'TEXT'},'Text',editor);
+		
+		el.onmousedown=editIcon;
+		el.style.top = y+'px';
+		el.style.left = x+'px';
+		
+		enableDragging(el);
+		enableResizing(el);
+	}
+}
+
+
+function editIcon(e){
+	var elm=e.target;
+		
+	if(elm.className.split(' ').indexOf('_Editing')==-1){
+		elm.className+=' '+'_Editing';
+		elm.getElementsByClassName('grabber')[0].style.visibility='visible';
+		elm.getElementsByClassName('resizer')[0].style.visibility='visible';
+	}
+	else{
+		elm.className=elm.className.replace('_Editing','');
+		elm.getElementsByClassName('grabber')[0].style.visibility='hidden';
+		elm.getElementsByClassName('resizer')[0].style.visibility='hidden';
+	}
+	
+	readProp(elm);
+	
+	editingElm=elm;
+	
+	elm.style.backgroundImage=document.getElementById('icon').src;
+}
+
+
+function readProp(el){
+	
+	if(el.getAttribute('data-type')=="ICONXPBUTTON")
+	
+	var json={		
+		type:'ICONXPBUTTON',
+		x:getStyle(el,'left',true),
+		y:getStyle(el,'right',true),
+		sizeNormal:getStyle(el,'width',true),
+		sizePushed:'',
+		iconNormal:'',
+		scaleAlpha:'',
+		iconPushed:'',
+		scaleAlpha:'',
+		command:el.getAttribute('data-command'),
+		newIni:el.getAttribute('data-newini'),
+		shutDownAnimation:el.getAttribute('data-shutdownanimation')
+	};
+	
+	if(el.getAttribute('data-type')=="TEXT")
+	var json={		
+		type:'TEXT',
+		x:getStyle(el,'left',true),
+		y:getStyle(el,'right',true),
+		color:getStyle(el,'color',false),
+		frameColor:getStyle(el,'text-shadow-color',false),
+		font:getStyle(el,'font-family',false),
+		size:getStyle(el,'font-size',true),
+		weight:getStyle(el,'font-weight',true)
+	};
+	
+	
+	document.getElementById('Inspector').innerHTML=printo(json,'<br>','&nbsp;&nbsp;&nbsp;&nbsp;');
+	return json;
+}
+
+function readAllComponents(){
+	
+	var componentList=editor.getElementsByClassName('Component');
+	
+	var jsonList=[];
+	
+	for(var i=0;i<componentList.length;i++){
+		jsonList.push( readProp(componentList[i]) );
+	}
+	
+	document.getElementById('Inspector').innerHTML=printo(jsonList,'<br>','&nbsp;&nbsp;&nbsp;&nbsp;');
+
+}
+
+
+
+/**
+ * Print a object or a array tree and children
+ * @param {Object} obj Object or Array to print
+ * @param {string} linebreak (optional)
+ * @param {string} tabulation (optional)
+ * @return {string}
+ */
+function printo(obj,linebreak,tabulation) {
+
+	var n = (linebreak)?(linebreak):("\n");
+	var tabtoken = (tabulation)?(tabulation):("\t");
+	
+	var text = "";
+	var level = 0; //initial tabulation level
+	
+	var tipo=kindOf(obj);
+	
+	if( tipo==="object" || tipo==="array"){ //check if 'obj' is a object/array
+		text += tab(level) + kindOf(obj) + n + tab(level) + "(" + n;
+		text = expandNode(obj); //inicia a varredura
+	}
+	else{ //not object/array just an primitive variable
+		text = "variable " + tipo + " => " + obj;
+	}
+	
+	function expandNode(obj) {
+		
+		level++; //go down ---->
+		for (var node in obj) {
+			
+			tipo = kindOf(obj[node]);
+			
+			if (tipo==="object" || tipo==="array") { //node is an Object (have children)
+			
+				text += tab(level) + "[" + node + "] " + tipo + " => " + n; //print parent
+				text += tab(level) + "(" + n; //open a family bracket
+				text = expandNode(obj[node]); //print children using recursion
+			}
+
+			else { //obj is a property (not have children)
+				text += tab(level);
+				text += "["+node+"] "+tipo+" => "+obj[node]+n; }
+		
+		} //end of family (all children of family is discovered)
+		
+		level--; // go up  <----
+		
+		text += tab(level) + ")" + n; //close family bracket
+		text += tab(level) + n; //identation
+		
+		return (text); //return family
+	}
+	
+	return (text); //return full tree
+	
+	
+	function tab(n){
+		var str="";
+		while (n>0) {
+			str += tabtoken;
+			n--;
+		}
+		return(str);
+	}
+	
+	function kindOf(variable){
+		var type;
+		if (variable===null) { type='null'; }
+		else if ((typeof variable==='number') && (variable%1===0)) { type='integer'; }
+		else if ((typeof variable==='number') && (variable%1!==0)) { type='float'; }
+		else if (typeof variable==='number') { type='number'; }
+		else if (Object.prototype.toString.call(variable)==='[object Array]'){ type='array'; } 
+		else { type=typeof variable; }
+		return(type);
+	}
+}
+
+</script>
+  
+</body>
+</html>

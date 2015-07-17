@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Untitled Document</title>
+<script src="UtilsDOM.js"></script>
+<script src="layout.js"></script>
+<script src="extends.js"></script>
+<script src="drag_n_resize.js"></script>
+
+<style type="text/css">
+#apDiv1 {
+	position:absolute;
+	left:62px;
+	top:113px;
+	width:170px;
+	height:153px;
+	z-index:1;
+	border: 1px solid red;
+}
+#inspectorDiv {
+	position:absolute;
+	left:364px;
+	top:32px;
+	width:310px;
+	height:585px;
+	z-index:2;
+	border: 1px solid black;
+}
+</style>
+</head>
+<body>
+
+
+<div id="apDiv1" data-inspectable="Box"></div>
+<div id="inspectorDiv"></div>
+
+<script type="text/javascript">
+/* JAVASCRIPT GOES HERE */
+window.onload=function(){
+	
+	// property,inputType,description'
+	var inspectorDiv=document.getElementById('inspectorDiv');
+	var apDiv1=document.getElementById('apDiv1');
+	
+	Inspector.inspectorDiv=inspectorDiv;
+	Inspector.Components=Components;
+	Inspector.attachInspection(apDiv1,'click');
+	
+};
+
+var Components={
+	'Box':{
+		'Width':{
+			input:{type:'text'},
+			getter:function(){return getStyle(this,'width',true)},
+			setter:function(){Inspector.elm.style.width=this.value+"px";}
+		},
+		'Height':{
+			input:{type:'number'},
+			getter:function(){return getStyle(this,'height',true)},
+			setter:function(){Inspector.elm.style.height=this.value+"px";}
+		},
+		'Y':{
+			input:{type:'number'},
+			getter:function(){return getStyle(this,'top',true)},
+			setter:function(){Inspector.elm.style.top=this.value+"px";}
+		},
+		'X':{
+			input:{type:'number'},
+			getter:function(){return getStyle(this,'left',true)},
+			setter:function(){Inspector.elm.style.left=this.value+"px";}
+		},
+		'Text':{
+			input:{type:'text'},
+			getter:function(){return this.innerText},
+			setter:function(){Inspector.elm.innerText=this.value;}
+		},
+		'Color':{
+			input:{type:'color'},
+			getter:function(){return getStyle(this,'backgroundColor')},
+			setter:function(){Inspector.elm.style.backgroundColor=this.value;}
+		}	
+	}
+}
+
+var Inspector=new function(){
+	
+	this.elm;			//Current element being inspected
+	this.Components;	//Objectthe abstract components with getter and setters
+	this.inspectorDiv;	//Inspector panel
+	var that=this;
+	
+	/** Attach event to inspect element on a specified trigger */
+	this.attachInspection=function(element,trigger){
+		addEvent(element,trigger,function(){ that.inspect(this) });
+	}
+	
+	/** Inspect a specified element */
+	this.inspect=function(element){
+		
+		that.elm=element;
+		
+		var componentKind=element.getAttribute('data-inspectable');
+		var	editModel=that.Components[componentKind];
+		
+		if(componentKind!=undefined){
+			
+			inspectorDiv.innerHTML=""; //clear inspector panel
+			
+			for(property in editModel){
+				var m=editModel[property];
+				
+				var label=newElement('div','',{},property,that.inspectorDiv);
+				
+				var edit;
+				edit=newElement('input','',m.input,'',label);
+				
+				edit.value=m.getter.call(element); //read current componente property
+				edit.onblur=m.setter; //define setter's to change component property
+				edit.onclick=m.setter;
+			}
+		}
+	}
+	
+}
+
+</script>
+
+</body>
+</html>

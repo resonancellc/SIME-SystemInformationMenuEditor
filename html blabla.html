@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Untitled Document</title>
+<script src="UtilsDOM.js"></script>
+<style type="text/css">
+#apDiv1 {
+	position:absolute;
+	left:70px;
+	top:76px;
+	width:263px;
+	height:244px;
+	z-index:1;
+}
+#apDiv2 {
+	left:52px;
+	top:57px;
+	width:140px;
+	height:127px;
+	z-index:2;
+}
+#apDiv3 {
+	left:86px;
+	top:94px;
+	width:80px;
+	height:56px;
+	z-index:3;
+}
+
+span,div{
+	border: 2px dotted blue;
+	margin: 2px;
+	padding: 2px;
+	display: inline-block;
+}
+</style></head>
+
+<body>
+
+Outside-Before
+<div id="apDiv1">
+	Before
+    
+    <span id="apDiv2">
+    	Inside-2 
+        
+        <span id="apDiv3">
+        	Inside-3
+        </span>
+        
+	</span>
+    
+    After
+</div>
+Outiside-After
+
+</body>
+</html>
+<script>
+
+var opts={'Blue':'1','Red':'2','Yellow':'3','Green':'4'};
+
+var edit=newElement('SELECT','',{});
+for(var opt in opts){ edit.options[edit.options.length] = new Option(opt,opts[opt]); }
+
+document.body.appendChild(edit);
+
+
+
+</script>

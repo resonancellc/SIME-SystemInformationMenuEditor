@@ -1,0 +1,402 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SIME</title>
+
+<script src="UtilsDOM.js"></script>
+<script src="layout.js"></script>
+<script src="extends.js"></script>
+
+<script src="inspector.js"></script>
+<script src="printo.js"></script>
+<script src="INIparser.js"></script>
+
+<script src="drag_resize.js"></script>
+<link href="drag_resize.css" rel="stylesheet">
+
+<style type="text/css">
+
+body{
+	background-color: #CCC;
+	background-image: url(darkdenim3.png);
+}
+#Toolbar {
+	-webkit-user-select:none;
+	position:absolute;
+	left:8px;
+	right:8px;
+	top:8px;
+	height:48px;
+	z-index:2;
+	padding: 5px;
+	border: 2px outset #666;
+	border-radius: 5px;
+	background-color:#A3A3A3;
+	background-image: url(black_denim.png);
+	color: #CCC;
+	
+	-moz-box-shadow: 0px 2px 5px #000000;
+	-webkit-box-shadow: 0px 2px 5px #000000;
+	box-shadow: 0px 2px 5px #000000;
+}
+#Inspector {
+	-webkit-user-select:none;
+	position:absolute;
+	left:8px;
+	top:78px;
+	bottom: 16px;
+	width:180px;
+	z-index:2;
+	padding: 5px;
+	border: 2px outset #666;
+	border-radius: 5px;
+	background-color:#E9E9E9;
+	background-image: url(classy_fabric.png);
+	color: #CCC;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:16px;
+	
+	overflow:auto;
+	
+	-moz-box-shadow: 0px 2px 5px #000000;
+	-webkit-box-shadow: 0px 2px 5px #000000;
+	box-shadow: 0px 2px 5px #000000;
+}
+#Editor {
+	-webkit-user-select:none;
+	position:absolute;
+	left:211px;
+	top:80px;
+	width:480px;
+	height:272px;
+	z-index:1;
+	border: 3px inset #666;
+	background-color:#6CC;
+	background-image: url('http://osxdaily.com/wp-content/uploads/2010/02/ipad-background-picture1.jpeg');
+}
+#Source {
+	visibility: hidden;
+	display: none;
+	
+	position:absolute;
+	left:8px;
+	right: 8px;
+	top:78px;
+	bottom: 8px;
+	z-index:2;
+	overflow: scroll;
+	background-color:#FFF;
+	font-family:"Courier New", Courier, monospace;
+	font-size: 10pt;
+	
+	-moz-box-shadow: 0px 2px 5px #000000;
+	-webkit-box-shadow: 0px 2px 5px #000000;
+	box-shadow: 0px 2px 5px #000000;
+}
+
+#Toolbar button{
+	font-family:Tahoma, Geneva, sans-serif;
+	background-color: #333;
+	border: 2px outset #666;
+	color: #CCC;
+	height: 48px;
+	border-radius: 5px;
+}
+#Toolbar button:hover{
+	color: #FFF;
+}
+#Toolbar button:active{
+	background-color: #333;
+	border-style: inset;
+	color: #CCC;
+}
+
+#Inspector input,#Inspector select{
+	float: right;
+	width: 50%;
+}
+
+#Inspector input[type=number]{
+	text-align:right;
+}
+
+
+/**************************/
+
+.ICONXPBUTTON{
+	position:absolute;
+	left: 30px;
+	top: 30px;
+	width: 48px;
+	height: 48px;
+	border: 0px solid navy;
+	
+	background-color: #69C;
+	background-repeat: no-repeat;
+}
+
+.TEXT{
+	position:absolute;
+	left: 30px;
+	top: 30px;
+	width: 48px;
+	height: 48px;
+	border: 0px solid navy;
+	background-color: transparent;
+}
+
+
+.SELECTED{
+	border-style: dashed !important;
+	border-width: 1px;
+	border-color: #F0F !important;
+	
+	-moz-box-shadow: 0px 0px 5px #ff00ff;
+	-webkit-box-shadow: 0px 0px 5px #ff00ff;
+	box-shadow: 0px 0px 5px #ff00ff;	
+}
+
+
+
+div.grabber{
+    position:absolute;
+	visibility:visible;
+    top: -5px;
+    left: -5px;
+    width: 5px;
+    height: 5px;
+    background: #CCC;
+    border:3px double #333;
+    cursor: move;
+}
+div.grabber:active{
+	background: #333;
+}
+
+div.resizer{
+    position:absolute;
+	visibility:visible;
+    bottom: -5px;
+    right: -5px;
+    width: 8px;
+    height: 8px;
+    background: #FFF;
+    border:1px solid #aaa;
+    cursor: nwse-resize;
+}
+div.resizer:active{
+	background: #333;
+}
+
+</style>
+</head>
+<body>
+
+
+<div id="Toolbar">
+	Toolbar 
+    <button onclick='Manager.addComponent(createIcon())'>ICON</button>
+    <button onclick='Manager.addComponent(createText())'>TEXT</button>
+    <button onclick='Manager.addComponent(createClock())'>CLOCK</button>
+    <button onclick='toggleView()'>View / Code</button>
+</div>
+
+<div id="Inspector"> Inspector </div>
+
+<div id="Editor" class="Traversable" data-inspectable="Screen"></div>
+<div id="Source"> Source Code </div>
+
+
+
+<script type="text/javascript">
+/* JAVASCRIPT GOES HERE */
+window.onload=function(){
+	
+	Parser.codeDiv=document.getElementById('Source');	
+		
+	Manager.editorDiv=document.getElementById('Editor');
+	Manager.inspectorDiv=document.getElementById('Inspector');
+	Manager.toolbarDiv=document.getElementById('Toolbar');
+	Manager.initialize();
+	
+	Inspector.inspectorDiv=document.getElementById('Inspector');
+	Inspector.Components=Components1;
+};
+
+
+function getImage(inputFile,div) {
+    if (inputFile.files && inputFile.files[0]){
+		
+		if(typeof FileReader!==undefined){
+			var reader = new FileReader();
+	
+			reader.onload = function(e) {
+				var data=e.target.result;
+				div.style.backgroundImage="url("+data+")";
+				
+				naturalSize(data,div);
+			}
+	
+			reader.readAsDataURL(inputFile.files[0]);
+		}else{
+			div.style.backgroundImage="url("+inputFile.value+")";
+		}
+		
+    }
+}
+
+function naturalSize(base64,div){
+	var image = document.createElement("img");
+	image.setAttribute("src", base64);
+	
+	image.onload=function(){
+		div.style.width=image.naturalWidth +"px";
+		div.style.height=image.naturalHeight +"px";
+		image = null;
+	}
+}
+
+
+function createIcon(){
+	var att={className:'Component ICONXPBUTTON','data-type':'ICONXPBUTTON','data-inspectable':'Box'};
+	var text='';
+
+	return newElement('div','',att,text);
+}
+
+function createText(){
+	var att={className:'Component TEXT','data-type':'TEXT','data-inspectable':'Caption'};
+	var text='Text';
+
+	return newElement('div','',att,text);
+}
+
+function createClock(){
+	var att={className:'Component TEXT','data-type':'TEXT','data-inspectable':'Clock','style':'font-family: Arial;'};
+	var text='12:00';
+
+	return newElement('div','',att,text);
+}
+
+
+var Manager = new function(){
+	
+	this.editorDiv;
+	this.inspectorDiv;
+	this.toolbarDiv;
+	
+	this.selectedComp;
+	var that=this;
+	
+	this.addComponent = function(component){
+		
+		that.editorDiv.onclick=function(ev){
+			
+			//clear adding event
+			that.editorDiv.onclick=null;
+			
+			//click position
+			x = ev.clientX - that.editorDiv.offsetLeft;
+			y = ev.clientY - that.editorDiv.offsetTop;
+			
+			//move component to insertion position
+			component.style.top = y+'px';
+			component.style.left = x+'px';
+			
+			//initialize component
+			that.initializeComp(component);
+			
+			//add component to editor frame
+			that.editorDiv.appendChild(component);
+			
+			//select added component
+			that.unselectComp(that.editorDiv);
+			that.selectComp(component);
+			Inspector.inspect(component);
+		}
+	}
+	
+	this.initialize = function(){
+		
+		var components=that.editorDiv.children;
+		for(var i=0;i<components.length;i++){
+			that.initializeComp(components[i]);
+		}
+
+		makeResizable(that.editorDiv); //BUGGY!
+		Inspector.attachInspection(that.editorDiv,'mousedown');
+		addEvent(that.editorDiv,'mousedown',that.selfSelect);
+	}
+	
+	this.initializeComp = function(component){
+		
+			makeDraggable(component);
+			makeResizable(component);
+		
+			//attach selection event
+			addEvent(component,'mousedown',that.selfSelect);
+			
+			Inspector.attachInspection(component,'mousedown');
+			Inspector.attachInspection(component,'mouseup');	
+	}
+	
+	this.selfSelect = function(e){
+		
+		var comp=e.target;
+		if(comp.className.indexOf('GRABBER')!=-1 || comp.className.indexOf('RESIZER')!=-1){
+			comp=comp.parentElement;
+		}
+		
+		that.unselectComp(that.editorDiv);
+		
+		//unselect others
+		var components=that.editorDiv.children;
+		for(var i=0;i<components.length;i++){
+			that.unselectComp(components[i]);
+		}
+		
+		//select current
+		that.selectComp(comp);
+	}
+	
+	this.unselectComp = function(element){
+		element.className=element.className.replace('SELECTED','');
+		
+		for(var i=0,el=element.children;i<el.length;i++){
+			if(el[i].className.indexOf('GRABBER')!=-1 || el[i].className.indexOf('RESIZER')!=-1){
+				el[i].style.visibility='hidden';
+			}
+		}
+	}
+	
+	this.selectComp = function(element){
+		element.className+=' '+'SELECTED';
+		
+		for(var i=0,el=element.children;i<el.length;i++){
+			if(el[i].className.indexOf('GRABBER')!=-1 || el[i].className.indexOf('RESIZER')!=-1){
+				el[i].style.visibility='visible';
+			}
+		}
+
+		Manager.selectedComp=element;
+	}
+	
+}
+
+function toggleView(){
+	if(getStyle(Parser.codeDiv,'visibility')=="hidden"){
+		Parser.codeDiv.style.visibility="visible";
+		Parser.codeDiv.style.display="block";		
+	}else{
+		Parser.codeDiv.style.visibility="hidden";
+		Parser.codeDiv.style.display="none";		
+	}
+}
+
+
+
+</script>
+  
+</body>
+</html>

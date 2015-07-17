@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Untitled Document</title>
+<style type="text/css">
+
+*{
+    -webkit-user-select:none;
+}
+div{
+    width: 100px;
+    height: 100px;
+    background:white;
+    border:1px solid #aaa;
+    display:inline-block;
+    position:absolute;
+}
+
+div.grabber{
+    top: -5px;
+    left: -5px;
+    width: 8px;
+    height: 8px;
+    background: #CCC;
+    border:1px solid #aaa;
+    cursor: move;
+    position:absolute;
+}
+div.resizer{
+    bottom: -5px;
+    right: -5px;
+    width: 8px;
+    height: 8px;
+    background: #FFF;
+    border:1px solid #aaa;
+    cursor: nwse-resize;
+    position:absolute;
+}
+​
+
+</style></head>
+
+<body>
+
+<div class="drag" style="top:50px;left:50px;"></div>
+<div class="drag" style="top:50px;left:200px;width:300px;"></div>​
+
+<script type="text/javascript">
+
+window.onload=function(){
+
+function enableDragging(ele) {
+    var dragging = dragging || false,
+        x, y, Ox, Oy,
+        current;
+        enableDragging.z = enableDragging.z || 1;
+    var grabber = document.createElement("div");
+    grabber.setAttribute("class", "grabber");
+    ele.appendChild(grabber);
+    grabber.onmousedown = function(ev) {
+        current = ev.target.parentNode;
+        dragging = true;
+        x = ev.clientX;
+        y = ev.clientY;
+        Ox = current.offsetLeft;
+        Oy = current.offsetTop;
+        current.style.zIndex = ++enableDragging.z;
+        console.log(dragging);
+
+        window.onmousemove = function(ev) {
+            if (dragging == true) {
+                var Sx = ev.clientX - x + Ox,
+                    Sy = ev.clientY - y + Oy;
+                current.style.top = Sy + "px";
+                current.style.left = Sx + "px";
+                return false;
+            }
+        };
+        window.onmouseup = function(ev) {
+            dragging && (dragging = false);
+        }
+    };
+}
+
+
+function enableResizing(ele) {
+    var resizing = resizing || false,
+        x, y, Ox, Oy,
+        current;
+   	enableResizing.z = enableResizing.z || 1;
+		
+    var resizer = document.createElement("div");
+    resizer.setAttribute("class", "resizer");
+    ele.appendChild(resizer);
+    resizer.onmousedown = function(ev) {
+        current = ev.target.parentNode;
+        resizing = true;
+        x = ev.clientX;
+        y = ev.clientY;
+        Ox = current.clientWidth;
+        Oy = current.clientHeight;
+        current.style.zIndex = ++enableDragging.z;
+        console.log(resizing);
+
+        window.onmousemove = function(ev) {
+            if (resizing == true) {
+                var Sx = ev.clientX - x + Ox,
+                    Sy = ev.clientY - y + Oy;
+                current.style.height = Sy + "px";
+                current.style.width = Sx + "px";
+                return false;
+            }
+        };
+        window.onmouseup = function(ev) {
+            resizing && (resizing = false);
+        }
+    };
+}
+
+
+
+var ele = document.getElementsByClassName("drag");
+for(var i = 0; i < ele.length; i++){
+    enableDragging(ele[i]);
+	enableResizing(ele[i]);
+}
+
+
+};
+</script>
+  
+</body>
+</html>
